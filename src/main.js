@@ -6,9 +6,12 @@ import { setupCounter } from './counter.js'
 import maplibregl from 'maplibre-gl'
 import { ImageService, imageService, ImageMapLayer, imageMapLayer, Identify, identify } from 'esri-leaflet'
 
-const ground = imageMapLayer({
-  url: "https://kyraster.ky.gov/arcgis/rest/services/ElevationServices/Ky_DEM_KYAPED_2FT_Phase2/ImageServer",
-})
+const ui = {
+  height: document.querySelector('#height'),
+  elevation: document.querySelector('#elevation'),
+  surface: document.querySelector('#surface'),
+  spinner: document.querySelector('.spinner'),
+}
 
 const map = new maplibregl.Map({
   container: 'map', // container id
@@ -148,40 +151,9 @@ const map = new maplibregl.Map({
 
 });
 
-// const elevations = [400.23, 512.233, 565.33, 1223.32]
-
-const elev = (r, g, b) => {
-  return ((r * 256) + g + (b / 256));
-}
-
-console.log(elev(3, 204, 30));
-console.log(elev(3, 203, 217));
-
-
-
-// const rgb = (e) => {
-//     const a = Math.floor(e / 256);
-//     const b = Math.floor(e % 256);
-//     const c = Math.floor((e % 1) * 256);
-//     return [a, b, c];
-// }
-// for (let i = 0; i < 256; i++) {
-//     const x = Math.random() * 5000;
-//     [a, b, c] = rgb(x);
-//     const y = elev(a, b, c);
-//     console.log(x, y, y / x);
-// }
-
-// elevations.forEach(e => {
-//     const a = Math.floor(e / 256);
-//     const b = Math.floor(e % 256);
-//     const c = Math.floor((e % 1) * 256);
-//     console.log(a, b, c);
-//     console.log(elev(a, b, c));
-// })
 
 map.on('load', function () {
-  const exaggeration = 1 / (3.28084 * 1);
+
   // map.setTerrain({ 'source': 'terrain', 'exaggeration': exaggeration });
 
   map.addControl(
@@ -192,8 +164,7 @@ map.on('load', function () {
     })
   );
 
-  map.style.cursor = 'crosshair';
-
+  const exaggeration = 1 / (3.28084 * 1);
   map.addControl(
     new maplibregl.TerrainControl({
       source: 'terrain',
@@ -213,84 +184,139 @@ map.on('load', function () {
     })
   );
 
+  let geolocate = new maplibregl.GeolocateControl({
+    positionOptions: {
+      enableHighAccuracy: true
+    },
+    trackUserLocation: true,
+    showCompass: true,
+    // showAccuracyCircle: true,
+  });
+  map.addControl(geolocate);
+  geolocate.on('geolocate', (e) => {
+    console.log('A geolocate event has occurred.', e);
+    const coords = {
+      lngLat:
+      {
+        lng: e.coords.longitude,
+        lat: e.coords.latitude
+      }
+    }
+    getHeight(coords);
+  });
+
   map.setSky({
     'sky-color': "skyblue",
     'sky-horizon-blend': 1,
     'horizon-color': "whitesmoke",
-    'horizon-fog-blend': 0.5,
+    'horizon-fog-blend': 0,
     'fog-color': "whitesmoke",
-    'fog-ground-blend': 1,
+    'fog-ground-blend': 0,
   });
 
-  map.on('click', function (e) {
-    const zoom = map.getZoom();
-    map.setZoom(zoom + 0.001);
-    console.log(`Zoom level: ${zoom}`);
-    const tileSize = 512;
-    const lng = e.lngLat.lng;
-    console.log(`Longitude: ${lng}`);
-    const lat = e.lngLat.lat;
-    console.log(`Latitude: ${lat}`);
-    let baseElevation = 0;
+  map.on('click', getHeight);
 
-    // Calculate tile coordinates
-    const z = 19 //Math.floor(zoom);
-    console.log(`Zoom level (integer): ${z}`);
-    const n = 2 ** z; // Number of tiles at zoom level z
-    console.log(`Number of tiles at zoom level ${z}: ${n}`);
-    const x = Math.floor((lng + 180) / 360 * n);
-    console.log(`Tile X coordinate: ${x}`);
-    const y = Math.floor(
-      (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n
-    );
-    console.log(`Tile Y coordinate: ${y}`);
-
-    // Build tile URL (assumes index.terrain.json points to the correct tile URL template)
-    const tileUrl = `https://nyc3.digitaloceanspaces.com/astoria/tiles/lex-2025-dsm-rgb-dem/${z}/${x}/${y}.png`;
-
-    // Calculate pixel position in tile
-    const worldX = ((lng + 180) / 360 * n * tileSize) % tileSize;
-    console.log(`World X coordinate: ${worldX}`);
-    const sinLat = Math.sin(lat * Math.PI / 180);
-    console.log(`Sine of Latitude: ${sinLat}`);
-    const worldY = ((0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * n * tileSize) % tileSize;
-    console.log(`World Y coordinate: ${worldY}`);
-    const px = Math.floor(worldX);
-    const py = Math.floor(worldY);
-
-    // Load tile image and sample pixel
-    const img = new window.Image();
-    img.crossOrigin = "Anonymous";
-    img.onload = function () {
-      const canvas = document.createElement('canvas');
-      canvas.width = tileSize;
-      canvas.height = tileSize;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0);
-      const pixel = ctx.getImageData(px, py, 1, 1).data;
-      const [r, g, b] = pixel;
-      const elevation = elev(r, g, b);
-      console.log(`Elevation at clicked point: ${elevation.toFixed(2)}`);
-      getHeight(ground, e.lngLat)
-        .then((baseElev) => {
-          baseElevation = baseElev;
-          console.log(`Base elevation at clicked point: ${baseElevation}`);
-          console.log("height", elevation - baseElevation);
-        })
-        .catch((error) => {
-          console.error('Error fetching base elevation:', error);
-        });
-
-    };
-    img.onerror = function () {
-      alert('Failed to load DEM tile.');
-    };
-    img.src = tileUrl;
+  // When a click event occurs on a feature in the states layer, open a popup at the
+  // location of the click, with description HTML from its properties.
+  map.on('click', 'tower-layer', (e) => {
+    const props = e.features[0].properties;
+    const popup = `<h3>${props.name}</h3>
+    Floors: ${props.height}</br>
+    Type: ${props.type}`
+    console.log(popup);
+    new maplibregl.Popup()
+      .setLngLat(e.lngLat)
+      .setHTML(popup)
+      .addTo(map);
   });
 
+
+  map.getCanvas().style.cursor = 'crosshair';
+
+
+  // Change it back to a pointer when it leaves.
+  map.on('mouseleave', 'states-layer', () => {
+    map.getCanvas().style.cursor = '';
+  });
 });
 
-function getHeight(elev, point) {
+function getHeight(point) {
+  const elev = (r, g, b) => {
+    return ((r * 256) + g + (b / 256));
+  }
+  ui.spinner.style.display = "block";
+
+  // const rgb = (e) => {
+  //     const a = Math.floor(e / 256);
+  //     const b = Math.floor(e % 256);
+  //     const c = Math.floor((e % 1) * 256);
+  //     return [a, b, c];
+  const zoom = map.getZoom();
+  map.setZoom(zoom + 0.001);
+  const tileSize = 512;
+  const lng = point.lngLat.lng;
+  const lat = point.lngLat.lat;
+  let baseElevation = 0;
+
+  // Calculate tile coordinates from longitude and latitude to Mercator coordinates 
+  const z = 19 //Math.floor(zoom);
+  const n = 2 ** z; // Number of tiles at zoom level z
+  const x = Math.floor((lng + 180) / 360 * n);
+  const y = Math.floor(
+    (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n
+  );
+
+
+  const tileUrl = `https://nyc3.digitaloceanspaces.com/astoria/tiles/lex-2025-dsm-rgb-dem/${z}/${x}/${y}.png`;
+
+  // Calculate pixel position in tile
+  const worldX = ((lng + 180) / 360 * n * tileSize) % tileSize;
+  console.log(`World X coordinate: ${worldX}`);
+  const sinLat = Math.sin(lat * Math.PI / 180);
+  console.log(`Sine of Latitude: ${sinLat}`);
+  const worldY = ((0.5 - Math.log((1 + sinLat) / (1 - sinLat)) / (4 * Math.PI)) * n * tileSize) % tileSize;
+  const px = Math.floor(worldX);
+  const py = Math.floor(worldY);
+  console.log(`Pixel coordinates in tile: (${px}, ${py})`);
+
+  // Load tile image and sample pixel
+  const img = new window.Image();
+  img.crossOrigin = "Anonymous";
+  img.onload = function () {
+    const canvas = document.createElement('canvas');
+    canvas.width = tileSize;
+    canvas.height = tileSize;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const pixel = ctx.getImageData(px, py, 1, 1).data;
+    console.log(`Pixel data at (${px}, ${py}):`, pixel);
+    const [r, g, b] = pixel;
+    const elevation = elev(r, g, b);
+
+    // Now query the elevation service for the base elevation at the clicked point
+    getElevation(point.lngLat)
+      .then((baseElev) => {
+        ui.height.innerHTML = `Height: ${Math.abs(elevation - baseElev).toFixed(1)} ft`;
+        ui.surface.innerHTML = `Surface: ${elevation.toFixed(1)} ft`;
+        ui.elevation.innerHTML = `Elevation: ${Number(baseElev).toFixed(1)} ft`;
+        ui.spinner.style.display = "none";
+      })
+      .catch((error) => {
+        console.error('Error fetching base elevation:', error);
+      });
+
+  };
+  img.onerror = function () {
+    alert('Failed to load DEM tile.');
+  };
+  img.src = tileUrl;
+  console.log(`Tile URL: ${tileUrl}`);
+}
+
+function getElevation(point) {
+  const elev = imageMapLayer({
+    url: "https://kyraster.ky.gov/arcgis/rest/services/ElevationServices/Ky_DEM_KYAPED_2FT_Phase2/ImageServer",
+  })
   return new Promise((resolve, reject) => {
     elev
       .identify()
