@@ -11,6 +11,12 @@ const ui = {
   elevation: document.querySelector('#elevation'),
   surface: document.querySelector('#surface'),
   spinner: document.querySelector('.spinner'),
+  geojson: {
+    "type": "FeatureCollection",
+    "name": "samples",
+    "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    "features": []
+  }
 }
 
 const map = new maplibregl.Map({
@@ -70,6 +76,11 @@ const map = new maplibregl.Map({
         'redFactor': 256,
         'greenFactor': 1,
         'blueFactor': 1 / 256,
+      }
+      ,
+      'sample': {
+        type: 'geojson',
+        data: ui.geojson
       }
     },
     "layers": [
@@ -144,6 +155,55 @@ const map = new maplibregl.Map({
           'line-width': 2
 
         }
+      },
+      {
+        'id': 'sample-layer',
+        'type': 'circle',
+        'source': 'sample',
+        'paint': {
+          'circle-radius': 5,
+          'circle-color': 'blue',
+          'circle-opacity': 0.5,
+          'circle-stroke-color': 'black',
+          'circle-stroke-width': 1
+        }
+      },
+      {
+        'id': 'tower-label',
+        'type': 'symbol',
+        'source': 'tower-source',
+        'filter': ['has', 'height'],
+        'layout': {
+          'text-field': ['get', 'label'],
+          'text-size': 10,
+          'text-offset': [0, 0],
+          'text-anchor': 'center',
+          'text-allow-overlap': true
+        },
+        'paint': {
+          'text-color': 'black',
+          'text-halo-color': 'white', // Halo color for better visibility
+          'text-halo-width': 1 // Width of the halo   
+        }
+
+      },
+      {
+        'id': 'sample-label',
+        'type': 'symbol',
+        'source': 'sample',
+        'layout': {
+          'text-field': ['get', 'height'],
+          'text-size': 10,
+          'text-offset': [0, -2],
+          'text-anchor': 'top',
+          'text-allow-overlap': true
+        },
+        'paint': {
+          'text-color': 'black',
+          'text-halo-color': 'white', // Halo color for better visibility
+          'text-halo-width': 1 // Width of the halo   
+        }
+
       },
     ]
   },
@@ -300,6 +360,23 @@ function getHeight(point) {
         ui.surface.innerHTML = `Surface: ${elevation.toFixed(1)} ft`;
         ui.elevation.innerHTML = `Elevation: ${Number(baseElev).toFixed(1)} ft`;
         ui.spinner.style.display = "none";
+        const feature = {
+          "type": "Feature",
+          "geometry": {
+            "type": "Point",
+            "coordinates": [point.lngLat.lng, point.lngLat.lat]
+          },
+          "properties": {
+            "elevation": Number(baseElev),
+            "height": Number(Math.abs(elevation - baseElev).toFixed(1)),
+            "surface": Number(elevation.toFixed(1)),
+            "lng": point.lngLat.lng,
+            "lat": point.lngLat.lat,
+          }
+        };
+        ui.geojson.features.push(feature);
+        map.getSource('sample').setData(ui.geojson);
+        console.log('Feature added:', feature);
       })
       .catch((error) => {
         console.error('Error fetching base elevation:', error);
