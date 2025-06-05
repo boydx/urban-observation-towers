@@ -3,22 +3,71 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/lex.svg" />
+  <link rel="icon" type="image/svg+xml" href="/cursor-u.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lex </title>
+  <title>Phase 2 elevation and height explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&family=Space+Grotesk:wght@300..700&display=swap"
+    rel="stylesheet">
 </head>
 
 <body>
   <div class="spinner"></div>
+
   <div id="map"></div>
-  <div id="info">
+  <div id="info">INFO</div>
+  <div id="error"></div>
+  <div id="info-expanded">
+    <span class="close">
+      &times;
+    </span>
+    <div class="content">
+      <h1>Phase 2 elevation and height explorer</h1>
+      <div class="legend">
+        <div>
+          <img src="tower.svg" alt="">Urban Observation Tower with number of floors and access type
+        </div>
+        <div>
+          <img src="sample.svg" alt="">Height above ground sample created by clicking on the map
+        </div>
+      </div>
+      <p>
+        Click to the map to sample the elevation and surface heights for a location inside New Circle Road, Lexington,
+        Kentucky. Refresh page to remove current samples.
+      </p>
+
+      <button id="download-json">Download samples as GeoJson</button>
+
+      <p>
+        Data derived from LiDAR data collected in 2019 and provided KyFromAbove and the Kentucky Division of Geographic
+        Information (DGI). Analysis by UKy Department of Geography and Boyd Shearer.
+      </p>
+
+      <button id="methodology">Methodology</button>
+      <div id="methodology-content">
+        <p>
+          The digital surface model (DSM) was calculated using the highest first-return in a 2-foot resolution raster.
+          The DSM was converted to a RGB terrain model showing surface elevations encoded as colors. The encoding is
+        <pre>e = (r * 256) + g + (b / 256)</pre>
+        </p>
+        <p>
+          This encoding works for Lexington's range of surface elevations and can be interpreted by MapLibre as a ground
+          surface on which to drape features.
+        </p>
+
+      </div>
+    </div>
+  </div>
+  <div id="stats">
     <div id="elevation">
       Elevation
     </div>
-    <div id="height">
+    <div id="surface">
       height
     </div>
-    <div id="surface">
+    <div id="height">
       height
     </div>
   </div>

@@ -11,9 +11,18 @@ const ui = {
   elevation: document.querySelector('#elevation'),
   surface: document.querySelector('#surface'),
   spinner: document.querySelector('.spinner'),
+  stats: document.querySelector('#stats'),
+  info: document.querySelector('#info'),
+  infoContent: document.querySelector('#info-expanded'),
+  close: document.querySelector('.close'),
+  download: document.querySelector('#download-json'),
+  error: document.querySelector('#error'),
+  methodology: document.querySelector('#methodology'),
+  methodContent: document.querySelector('#methodology-content'),
   geojson: {
     "type": "FeatureCollection",
-    "name": "samples",
+    "info": "A property that describes the data in this file.",
+    "name": "Lexington Phase 2 elevation and surface height sample points.",
     "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
     "features": []
   }
@@ -30,6 +39,7 @@ const map = new maplibregl.Map({
   "hash": true,
   "bearing": 0,
   "center": [-84.5, 38.03],
+
   // pitchWithRotate: false,
   style: {
     "id": "shaded-relief",
@@ -141,7 +151,7 @@ const map = new maplibregl.Map({
         'type': 'fill',
         'source': 'tower-source',
         'paint': {
-          'fill-color': 'red',
+          'fill-color': '#f6871f',
           'fill-opacity': 0.1,
 
         }
@@ -151,7 +161,7 @@ const map = new maplibregl.Map({
         'type': 'line',
         'source': 'tower-source',
         'paint': {
-          'line-color': 'red',
+          'line-color': '#f6871f',
           'line-width': 2
 
         }
@@ -162,10 +172,28 @@ const map = new maplibregl.Map({
         'source': 'sample',
         'paint': {
           'circle-radius': 5,
-          'circle-color': 'blue',
-          'circle-opacity': 0.5,
-          'circle-stroke-color': 'black',
+          'circle-color': 'purple',
+          'circle-opacity': 0.3,
+          'circle-stroke-color': 'purple',
           'circle-stroke-width': 1
+        }
+      },
+      {
+        'id': 'tower-label-height',
+        'type': 'symbol',
+        'source': 'tower-source',
+        'filter': ['has', 'height'],
+        'layout': {
+          'text-field': ['get', 'label2'],
+          'text-size': 9,
+          'text-offset': [0, 0.8],
+          'text-anchor': 'center',
+          'text-allow-overlap': false
+        },
+        'paint': {
+          'text-color': 'black',
+          'text-halo-color': 'whitesmoke', // Halo color for better visibility
+          'text-halo-width': 1 // Width of the halo   
         }
       },
       {
@@ -174,18 +202,18 @@ const map = new maplibregl.Map({
         'source': 'tower-source',
         'filter': ['has', 'height'],
         'layout': {
-          'text-field': ['get', 'label'],
-          'text-size': 10,
-          'text-offset': [0, 0],
+          'text-field': ['get', 'name'],
+          'text-size': 12,
+          'text-offset': [0, -1],
           'text-anchor': 'center',
-          'text-allow-overlap': true
+          'text-allow-overlap': false
         },
         'paint': {
           'text-color': 'black',
-          'text-halo-color': 'white', // Halo color for better visibility
-          'text-halo-width': 1 // Width of the halo   
+          'text-halo-color': 'whitesmoke',
+          'text-halo-width': 2,
+          'text-halo-blur': 1
         }
-
       },
       {
         'id': 'sample-label',
@@ -196,12 +224,14 @@ const map = new maplibregl.Map({
           'text-size': 10,
           'text-offset': [0, -2],
           'text-anchor': 'top',
-          'text-allow-overlap': true
+          'text-allow-overlap': false,
+
         },
         'paint': {
           'text-color': 'black',
-          'text-halo-color': 'white', // Halo color for better visibility
-          'text-halo-width': 1 // Width of the halo   
+          'text-halo-color': 'whitesmoke',
+          'text-halo-width': 1,
+          'text-halo-blur': 1
         }
 
       },
@@ -253,8 +283,9 @@ map.on('load', function () {
     // showAccuracyCircle: true,
   });
   map.addControl(geolocate);
+  let count = 0;
   geolocate.on('geolocate', (e) => {
-    console.log('A geolocate event has occurred.', e);
+    count++;
     const coords = {
       lngLat:
       {
@@ -262,7 +293,12 @@ map.on('load', function () {
         lat: e.coords.latitude
       }
     }
-    getHeight(coords);
+    if (count < 5) {
+      getHeight(coords);
+    }
+  });
+  geolocate.on('trackuserlocationend', (e) => {
+    count = 0;
   });
 
   map.setSky({
@@ -278,25 +314,54 @@ map.on('load', function () {
 
   // When a click event occurs on a feature in the states layer, open a popup at the
   // location of the click, with description HTML from its properties.
-  map.on('click', 'tower-layer', (e) => {
-    const props = e.features[0].properties;
-    const popup = `<h3>${props.name}</h3>
-    Floors: ${props.height}</br>
-    Type: ${props.type}`
-    console.log(popup);
-    new maplibregl.Popup()
-      .setLngLat(e.lngLat)
-      .setHTML(popup)
-      .addTo(map);
-  });
+  // map.on('click', 'tower-layer', (e) => {
+  //   const props = e.features[0].properties;
+  //   const popup = `<h3>${props.name}</h3>
+  //   Floors: ${props.height}</br>
+  //   Type: ${props.type}`
+  //   console.log(popup);
+  //   new maplibregl.Popup()
+  //     .setLngLat(e.lngLat)
+  //     .setHTML(popup)
+  //     .addTo(map);
+  // });
 
+  // map.on('mouseover', 'geojson-outline', (e) => {
+  //   map.getCanvas().style.cursor = 'pointer';
+  //   console.log('Mouse over state layer:', e.features[0].properties);
+  // });
+
+  // map.on('mouseout', 'geojson-outline', (e) => {
+  //   map.getCanvas().style.cursor = '';
+  // });
 
   map.getCanvas().style.cursor = 'crosshair';
 
 
-  // Change it back to a pointer when it leaves.
-  map.on('mouseleave', 'states-layer', () => {
-    map.getCanvas().style.cursor = '';
+  ui.info.addEventListener('click', () => {
+    if (ui.infoContent.style.display === "block") {
+      ui.infoContent.style.display = "none";
+      // ui.info.style.backgroundColor = "#f9f9f9";
+    } else {
+      ui.infoContent.style.display = "block";
+      // ui.info.style.backgroundColor = "unset";
+    }
+  });
+  ui.close.addEventListener('click', () => {
+    ui.infoContent.style.display = "none";
+  });
+  ui.download.addEventListener('click', downloadProfiles);
+  ui.error.addEventListener('click', () => {
+    ui.error.style.display = "none";
+  });
+  ui.methodology.addEventListener('click', () => {
+    if (ui.methodContent.style.display === "block") {
+      ui.methodContent.style.display = "none";
+      // ui.info.style.backgroundColor = "#f9f9f9";
+    } else {
+      ui.methodContent.style.display = "block";
+      // ui.info.style.backgroundColor = "unset";
+    }
   });
 });
 
@@ -325,7 +390,6 @@ function getHeight(point) {
   const y = Math.floor(
     (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * n
   );
-
 
   const tileUrl = `https://nyc3.digitaloceanspaces.com/astoria/tiles/lex-2025-dsm-rgb-dem/${z}/${x}/${y}.png`;
 
@@ -356,6 +420,8 @@ function getHeight(point) {
     // Now query the elevation service for the base elevation at the clicked point
     getElevation(point.lngLat)
       .then((baseElev) => {
+        ui.stats.style.display = "block";
+        ui.error.style.display = "none";
         ui.height.innerHTML = `Height: ${Math.abs(elevation - baseElev).toFixed(1)} ft`;
         ui.surface.innerHTML = `Surface: ${elevation.toFixed(1)} ft`;
         ui.elevation.innerHTML = `Elevation: ${Number(baseElev).toFixed(1)} ft`;
@@ -383,8 +449,11 @@ function getHeight(point) {
       });
 
   };
-  img.onerror = function () {
-    alert('Failed to load DEM tile.');
+  img.onerror = function (e) {
+    ui.error.style.display = "block";
+    ui.error.innerHTML = `No DSM tile`
+    ui.spinner.style.display = "none";
+    console.error('Error loading tile image:', e);
   };
   img.src = tileUrl;
   console.log(`Tile URL: ${tileUrl}`);
@@ -414,5 +483,43 @@ function getElevation(point) {
         resolve(results.pixel.properties.value);
       });
   });
+}
+
+function downloadProfiles() {
+  const key = "ky-elevation-profiles";
+  const storage = ui.geojson
+  const date = new Date();
+  const today = date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  });
+  console.log(storage)
+  const info = {
+    timestamp: date.toISOString(),
+    profiles: storage.length,
+    description: "Elevation and surface heights sample from Phase 2 lidar derived DEM and DSM.",
+    license: "CC BY 4.0",
+    attribution: "This data is provided by KyFromAbove, the Kentucky Division of Geographic Information (DGI) and the University of Kentucky Department of Geography. The app is developed by Boyd Shearer @boydx",
+    "description of data":
+    {
+      "geometry": "Coordinates for sample as an array in lng, lat format.",
+      "elevation": "DEM Elevation of the sample point in feet.",
+      "height": "DSM - DEM height in feet.",
+      "surface": "DSM surface height in feet.",
+      "lng": "Longitude of the sample point in decimal degrees.",
+      "lat": "Latitude of the sample point in decimal degrees.",
+    },
+  };
+  storage.info = info;
+  const dataStr = JSON.stringify(storage, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `ky-elevation-profiles-${today}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 

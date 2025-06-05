@@ -1,21 +1,30 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
+* {
+  box-sizing: border-box;
+}
+html {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Dosis", sans-serif;
+  font-optical-sizing: auto;
   font-weight: 400;
-
-  /* color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424; */
-
+  font-style: normal;
+  font-size: 100%;
+  line-height: 1.5rem;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  margin: 0;
-  padding: 0;
+.maplibregl-ctrl-scale,
+.maplibregl-ctrl-attrib-inner {
+  font-family: "Dosis", sans-serif;
+  font-weight: 500;
 }
 
 #map {
@@ -23,24 +32,184 @@ body {
   top: 0;
   bottom: 0;
   width: 100%;
-  background-color: rgb(224, 227, 227);
+  background-color: rgb(243, 242, 243);
+}
+
+#error {
+  display: none;
+  position: absolute;
+  top: 8px;
+  left: 100px;
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 0.35rem 0.5rem 0.45rem 0.5rem;
+  color: #333;
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 6000;
+  cursor: pointer;
 }
 
 #info {
   position: absolute;
   top: 8px;
   left: 8px;
-  /* width: 100%;
-  height: 100%; */
+  /* width: 50px; */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.35rem 0.5rem 0.45rem 0.5rem;
   color: #333;
-  border: 0.5px solid rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
   background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 6000;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0.5rem 0;
+}
+
+#info-expanded {
+  display: none;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 300px;
+  height: 100%;
+  /* align-items: center; */
+  /* justify-content: center; */
+  font-size: 1rem;
+  font-weight: 400;
+  padding: 4rem 0.5rem 0.45rem 0.5rem;
+  color: #333;
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  background-color: rgb(243, 242, 243);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+  overflow: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: start;
+  padding: 0.5rem;
+}
+
+.legend div {
+  display: flex;
+  align-items: center;
+  margin: 0.2rem 0;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 0.9rem;
+}
+
+.legend div img {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
+}
+
+pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  line-height: 0.8rem;
+  padding: 0.2rem;
+}
+
+.close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  cursor: pointer;
+  font-size: 2rem;
+}
+
+#methodology,
+#download-json {
+  font-family: "Dosis", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1rem;
+  padding: 0.35rem 0.5rem 0.45rem 0.5rem;
+  margin: 0.1rem;
+  border-radius: 5px;
+  border: none;
+  background-color: #ddd;
+  cursor: pointer;
+}
+
+#methodology:hover,
+#error:hover,
+#info:hover,
+#download-json:hover {
+  background-color: #acd6b2;
+}
+
+#info:active,
+#error:active,
+#button:active,
+#download-json:active {
+  background-color: #a0c9a1;
+}
+
+#methodology-content {
+  display: none;
+}
+
+#stats {
+  display: none;
+  position: absolute;
+  bottom: 40px;
+  left: 10px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  padding: 0.35rem 0.5rem 0.45rem 0.5rem;
+  color: #333;
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 100;
 }
 
 .spinner {
@@ -53,7 +222,7 @@ body {
   height: 100px;
   border-radius: 50%;
   border: 20px solid #ddd;
-  border-top-color: rgb(128, 0, 0);
+  border-top-color: purple;
   animation: spin 1s linear infinite;
   z-index: 9999;
 }
@@ -68,15 +237,9 @@ body {
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+@media (max-width: 576px) and (orientation: portrait) {
+  #info-expanded {
+    width: 100%;
+    padding: 2rem 0.5rem 0.45rem 0.5rem;
   }
 }
