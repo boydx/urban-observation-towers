@@ -36,7 +36,7 @@ const map = new maplibregl.Map({
   "pitch": 0,
   "maxPitch": 85,
   // "minPitch": 45,
-  "hash": false,
+  "hash": true,
   "bearing": 0,
   "center": [-84.49892, 38.04717],
   "attributionControl": false,
