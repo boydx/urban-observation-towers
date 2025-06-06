@@ -30,10 +30,10 @@ const ui = {
 
 const map = new maplibregl.Map({
   container: 'map', // container id
-  "zoom": 17,
+  "zoom": 15,
   // "minZoom": 17,
   "maxZoom": 22,
-  "pitch": 45,
+  "pitch": 0,
   "maxPitch": 85,
   // "minPitch": 45,
   "hash": true,

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="./cursor-u.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 2 elevation and height explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&family=Space+Grotesk:wght@300..700&display=swap"
+    rel="stylesheet">
+  <script type="module" crossorigin src="./assets/index-ig95x-ff.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B2L1r2Qb.css">
+</head>
+
+<body>
+  <div class="spinner"></div>
+
+  <div id="map"></div>
+  <div id="info">INFO</div>
+  <div id="error"></div>
+  <div id="info-expanded">
+    <span class="close">
+      &times;
+    </span>
+    <div class="content">
+      <h1>Phase 2 elevation and height explorer</h1>
+      <div class="legend">
+        <div>
+          <img src="tower.svg" alt="">Urban Observation Tower with number of floors and access type.
+        </div>
+        <div>
+          <img src="sample.svg" alt="">Sample created by clicking on the map showing height in feet and elevation in
+          feet.
+        </div>
+      </div>
+      <p>
+        Click to the map to sample the elevation and surface height for locations inside New Circle Road, Lexington,
+        Kentucky. Save the collection of samples or refresh page to remove them.
+      </p>
+
+      <button id="download-json">Download samples as GeoJSON</button>
+
+      <p>
+        Data derived from LiDAR data collected in 2019 and provided KyFromAbove and the Kentucky Division of Geographic
+        Information (DGI). Building footprints &copy; OpenStreetMap Contributors. Analysis by UKy Department of
+        Geography and Boyd Shearer.
+      </p>
+
+      <button id="methodology">Methodology</button>
+      <div id="methodology-content">
+        <p>
+          The digital surface model (DSM) was calculated using the highest first-return in a 2-foot resolution raster.
+          The DSM was converted to a RGB terrain model showing surface elevations encoded as colors. The encoding is
+        <pre>e = (r * 256) + g + (b / 256)</pre>
+        </p>
+        <p>
+          This encoding works for Lexington's range of surface elevations, has a sub-inch precision, and can be
+          interpreted by MapLibre as a ground
+          surface on which to drape features.
+        </p>
+        <p>
+          Height is calculated by subtracting the elevation of the DSM from the elevation of the digital elevation model
+          (DEM) maintained on kyraster.ky.gov. The DEM is a 2-foot resolution raster. Discrepancies in observed height
+          versus sampled height can occur from the DEM and DSM interpolation methods. Example: Some tower heights do not
+          agree with the number of floors in the tower - and how I counted the number of floors.
+        </p>
+
+      </div>
+    </div>
+  </div>
+  <div id="stats">
+    <div id="elevation">
+      Elevation
+    </div>
+    <div id="surface">
+      height
+    </div>
+    <div id="height">
+      height
+    </div>
+  </div>
+</body>
+
+</html>
