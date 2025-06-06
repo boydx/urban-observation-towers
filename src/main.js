@@ -101,8 +101,8 @@ const map = new maplibregl.Map({
         'paint': {
           "raster-opacity": 1,
           "raster-resampling": "nearest",
-          "raster-contrast": 0,
-          "raster-brightness-min": 0.5
+          "raster-contrast": 0.1,
+          "raster-brightness-min": 0.4
         }
       },
       {
@@ -110,10 +110,12 @@ const map = new maplibregl.Map({
         'type': 'raster',
         'source': 'canopy-tiles',
         'paint': {
-          "raster-opacity": 0.2,
+          "raster-opacity": 0.3,
           "raster-resampling": "nearest",
-          "raster-saturation": 0.6,
-          "raster-hue-rotate": 10
+          "raster-saturation": 0.7,
+          "raster-hue-rotate": 10,
+          "raster-contrast": 0.1,
+          "raster-brightness-min": 0.4
         }
       },
       // {
@@ -185,14 +187,14 @@ const map = new maplibregl.Map({
         'filter': ['has', 'height'],
         'layout': {
           'text-field': ['get', 'label2'],
-          'text-size': 9,
-          'text-offset': [0, 0.8],
+          'text-size': 9.5,
+          'text-offset': [0, 1],
           'text-anchor': 'center',
           'text-allow-overlap': false
         },
         'paint': {
           'text-color': 'black',
-          'text-halo-color': 'whitesmoke', // Halo color for better visibility
+          'text-halo-color': '#f9f9f9', // Halo color for better visibility
           'text-halo-width': 1 // Width of the halo   
         }
       },
@@ -203,14 +205,14 @@ const map = new maplibregl.Map({
         'filter': ['has', 'height'],
         'layout': {
           'text-field': ['get', 'name'],
-          'text-size': 12,
-          'text-offset': [0, -1],
+          'text-size': 11,
+          'text-offset': [0, -0.8],
           'text-anchor': 'center',
           'text-allow-overlap': false
         },
         'paint': {
           'text-color': 'black',
-          'text-halo-color': 'whitesmoke',
+          'text-halo-color': '#f9f9f9',
           'text-halo-width': 2,
           'text-halo-blur': 1
         }
@@ -221,7 +223,7 @@ const map = new maplibregl.Map({
         'source': 'sample',
         'layout': {
           'text-field': ['get', 'height'],
-          'text-size': 10,
+          'text-size': 12,
           'text-offset': [0, -2],
           'text-anchor': 'top',
           'text-allow-overlap': false,
@@ -229,8 +231,8 @@ const map = new maplibregl.Map({
         },
         'paint': {
           'text-color': 'black',
-          'text-halo-color': 'whitesmoke',
-          'text-halo-width': 1,
+          'text-halo-color': '#f9f9f9',
+          'text-halo-width': 2,
           'text-halo-blur': 1
         }
 
@@ -363,6 +365,11 @@ map.on('load', function () {
       // ui.info.style.backgroundColor = "unset";
     }
   });
+
+  ui.infoContent.addEventListener('scroll', (e) => {
+    console.log('Scrolled in info content:', e);
+  });
+
 });
 
 function getHeight(point) {
