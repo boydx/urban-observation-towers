@@ -36,9 +36,10 @@ const map = new maplibregl.Map({
   "pitch": 0,
   "maxPitch": 85,
   // "minPitch": 45,
-  "hash": true,
+  "hash": false,
   "bearing": 0,
-  "center": [-84.5, 38.03],
+  "center": [-84.49892, 38.04717],
+  "attributionControl": false,
 
   // pitchWithRotate: false,
   style: {
@@ -230,7 +231,7 @@ const map = new maplibregl.Map({
 
         },
         'paint': {
-          'text-color': 'black',
+          'text-color': 'purple',
           'text-halo-color': '#f9f9f9',
           'text-halo-width': 2,
           'text-halo-blur': 1
@@ -267,6 +268,12 @@ map.on('load', function () {
   map.addControl(
     new maplibregl.FullscreenControl({
       container: document.querySelector('body')
+    })
+  );
+  map.addControl(
+    new maplibregl.AttributionControl({
+      compact: true,
+      customAttribution: "UKy Geography, KyFromAbove, &copy; OSM contributors, MapLibre",
     })
   );
   map.addControl(
@@ -310,6 +317,16 @@ map.on('load', function () {
     'horizon-fog-blend': 0,
     'fog-color': "whitesmoke",
     'fog-ground-blend': 0,
+  });
+
+  map.on("pitch", (e) => {
+    const pitch = map.getPitch();
+    const zoom = map.getZoom();
+    if (pitch > 10) {
+      map.setPaintProperty('tower-layer-line', 'line-width', 0);
+    } else {
+      map.setPaintProperty('tower-layer-line', 'line-width', 2);
+    }
   });
 
   map.on('click', getHeight);
@@ -429,9 +446,10 @@ function getHeight(point) {
       .then((baseElev) => {
         ui.stats.style.display = "block";
         ui.error.style.display = "none";
-        ui.height.innerHTML = `Height: ${Math.abs(elevation - baseElev).toFixed(1)} ft`;
-        ui.surface.innerHTML = `Surface: ${elevation.toFixed(1)} ft`;
-        ui.elevation.innerHTML = `Elevation: ${Number(baseElev).toFixed(1)} ft`;
+        ui.height.innerHTML = `${Math.abs(elevation - baseElev).toFixed(1)} ft Height`;
+        ui.height.style.color = 'purple';
+        ui.surface.innerHTML = `${elevation.toFixed(1)} ft DSM`;
+        ui.elevation.innerHTML = `${Number(baseElev).toFixed(1)} ft DEM`;
         ui.spinner.style.display = "none";
         const feature = {
           "type": "Feature",

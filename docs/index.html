@@ -11,8 +11,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Dosis:wght@200..800&family=Space+Grotesk:wght@300..700&display=swap"
     rel="stylesheet">
-  <script type="module" crossorigin src="./assets/index-ig95x-ff.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-B2L1r2Qb.css">
+  <script type="module" crossorigin src="./assets/index-CNBf7wh0.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DPoJSIPj.css">
 </head>
 
 <body>
@@ -27,24 +27,26 @@
     </span>
     <div class="content">
       <h1>Phase 2 elevation and height explorer</h1>
-      <div class="legend">
-        <div>
-          <img src="tower.svg" alt="">Urban Observation Tower with number of floors and access type.
-        </div>
-        <div>
-          <img src="sample.svg" alt="">Sample created by clicking on the map showing height in feet and elevation in
-          feet.
-        </div>
-      </div>
       <p>
         Click to the map to sample the elevation and surface height for locations inside New Circle Road, Lexington,
         Kentucky. Save the collection of samples or refresh page to remove them.
       </p>
+      <div class="legend">
+        <div>
+          <img src="tower.svg" alt="">Urban Observation Tower with number of floors and access type. View the city above
+          street level.
+        </div>
+        <div>
+          <img src="sample.svg" alt="">Sample created by clicking map. Marker shows height above ground in feet.
+          Elevation and surface heights stored in GeoJSON.
+        </div>
+      </div>
+
 
       <button id="download-json">Download samples as GeoJSON</button>
 
       <p>
-        Data derived from LiDAR data collected in 2019 and provided KyFromAbove and the Kentucky Division of Geographic
+        Data derived from LiDAR collected in 2019 and provided KyFromAbove and the Kentucky Division of Geographic
         Information (DGI). Building footprints &copy; OpenStreetMap Contributors. Analysis by UKy Department of
         Geography and Boyd Shearer.
       </p>
@@ -59,13 +61,22 @@
         <p>
           This encoding works for Lexington's range of surface elevations, has a sub-inch precision, and can be
           interpreted by MapLibre as a ground
-          surface on which to drape features.
+          surface on which to drape features. A shaded relief map of the DSM with tree canopy cover height is the
+          default base map. In terrain mode, the map becomes a 3D surface showing relative heights of features.
         </p>
         <p>
           Height is calculated by subtracting the elevation of the DSM from the elevation of the digital elevation model
-          (DEM) maintained on kyraster.ky.gov. The DEM is a 2-foot resolution raster. Discrepancies in observed height
-          versus sampled height can occur from the DEM and DSM interpolation methods. Example: Some tower heights do not
-          agree with the number of floors in the tower - and how I counted the number of floors.
+          (DEM) maintained on kyraster.ky.gov. The DEM is a 2-foot resolution raster that models bare-earth ground
+          elevation. Discrepancies between observed
+          and sampled heights can occur from DEM interpolation in large areas where above-ground features were removed
+          and DSM artifacts and noise.
+        </p>
+        <p>
+          Subtract one floor when estimating observation tower heights by counting floors. The ground floor is counted
+          as the first floor. Some towers have additional floors above the highest observation deck.
+        </p>
+        <p>
+          Summer 2025
         </p>
 
       </div>
